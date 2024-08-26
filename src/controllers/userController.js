@@ -122,10 +122,12 @@ const login = async (req, res) => {
       return res.status(404).json({ error: "Invalid email or password" });
     }
 
+    console.log('token:', jwtSecret);
+
     if (jwtSecret === "undefined") {
       throw new Error("JWT_SECRET environment variable is not set.");
     }
-    console.log('token:', jwtSecret);
+    
 
     const token = jwt.sign(
       { userID: user.userID, userName: user.userName },
