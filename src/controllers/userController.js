@@ -5,6 +5,8 @@ const streamifier = require("streamifier");
 
 const User = require("../models/userModel");
 
+const jwtSecret = process.env.JWT_SECRET || "undefined";
+
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
@@ -118,9 +120,13 @@ const login = async (req, res) => {
       return res.status(404).json({ error: "Invalid email or password" });
     }
 
+    if (jwtSecret === "undefined") {
+        throw new Error("JWT_SECRET environment variable is not set.");
+      }
+
     const token = jwt.sign(
       { userID: user.userID, userName: user.userName },
-      process.env.JWT_SECRET,
+      jwtSecret,
       { expiresIn: "1h" }
     );
 
