@@ -271,9 +271,9 @@ const logoutUser = async (req, res) => {
 const fetchUserWithUserIDorUserName = async (req, res) => {
   try {
     const { userID, userName } = req.query;
-    console.log("userID:", userID);
-    console.log("userName:", userName);
-    if (!userID || !userName) {
+    // console.log("userID:", userID);
+    // console.log("userName:", userName);
+    if (!userID && !userName) {
       return res.status(400).json({ error: "userID or userName is required" });
     }
 
