@@ -1,6 +1,7 @@
 const express=require('express');
 const cors=require('cors');
 const morgan=require('morgan');
+const cookieParser=require('cookie-parser');
 
 const {connectToPostgresDB}=require('./src/database/postgresqlDB');
 const {connectToMongoDB}=require('./src/database/mongodb');
@@ -15,6 +16,7 @@ const SERVER_PORT=process.env.SERVER_PORT || 3000;
 app.use(cors());
 app.use(morgan('dev'));
 app.use(express.json());
+app.use(cookieParser());
 // app.use(express.urlencoded({extended:true}));
 
 async function connectToDB(){

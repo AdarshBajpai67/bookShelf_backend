@@ -20,8 +20,8 @@ const upload=multer({storage: storage});
 
 router.post('/signup', upload.single('userProfilePicture'), userController.signup);
 router.post('/login', userController.login);
-router.put('/update/', upload.single('userProfilePicture'), authMiddleware.authMiddleware,userController.updateUser);
-router.delete('/delete/',authMiddleware.authMiddleware,userController.deleteUser);
-router.post('/logout', authMiddleware.authMiddleware,userController.logoutUser);
+router.put('/update/', upload.single('userProfilePicture'), authMiddleware,userController.updateUser);
+router.delete('/delete/',authMiddleware,userController.deleteUser);
+router.post('/logout', authMiddleware,userController.logoutUser);
 
 module.exports=router;
