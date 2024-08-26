@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const cloudinary = require("cloudinary").v2;
@@ -121,8 +123,8 @@ const login = async (req, res) => {
     }
 
     if (jwtSecret === "undefined") {
-        throw new Error("JWT_SECRET environment variable is not set.");
-      }
+      throw new Error("JWT_SECRET environment variable is not set.");
+    }
 
     const token = jwt.sign(
       { userID: user.userID, userName: user.userName },
