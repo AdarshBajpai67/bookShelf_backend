@@ -1,6 +1,7 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const cloudinary = require("cloudinary").v2;
+const streamifier = require("streamifier");
 
 const User = require("../models/userModel");
 
@@ -11,14 +12,27 @@ cloudinary.config({
 });
 
 //function to upload to cloudinary
-const uploadToCloudinary = async (filePath, folder) => {
-  try {
-    const result = await cloudinary.uploader.upload(filePath, { folder });
-    return result.secure_url;
-  } catch (error) {
-    console.error("Error uploading to Cloudinary:", error);
-    throw error;
-  }
+const uploadToCloudinary = async (fileBuffer, folder) => {
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      { folder },
+      (error, result) => {
+        if (error) {
+          console.error("Error uploading to Cloudinary:", error);
+          return reject(error);
+        }
+        //   console.log("Upload to Cloudinary successful:", result.secure_url);
+        resolve(result.secure_url);
+      }
+    );
+    streamifier
+      .createReadStream(fileBuffer)
+      .pipe(uploadStream)
+      .on("error", (error) => {
+        console.error("Stream error:", error);
+        reject(error);
+      });
+  });
 };
 
 //function to delete from cloudinary
@@ -32,10 +46,12 @@ const deleteFromCloudinary = async (publicID) => {
 };
 
 const signup = async (req, res) => {
+  // console.log("request:", req.body);
+  //   console.log("uploaded file:", req.file);
   try {
     const { userName, userEmail, userPassword, userPhoneNumber, userBio } =
       req.body;
-    let userProfilePicture = req.file ? req.file.path : null;
+    let userProfilePicture = req.file ? req.file.buffer : null;
 
     if (!userName || !userEmail || !userPassword || !userPhoneNumber) {
       return res.status(400).json({ error: "All fields are required" });
@@ -55,13 +71,16 @@ const signup = async (req, res) => {
     res.status(201).json({ message: "User signed up successfully", user });
 
     if (userProfilePicture) {
+      // console.log("Uploading profile picture...");
       process.nextTick(async () => {
         try {
           const profilePictureUrl = await uploadToCloudinary(
             userProfilePicture,
             "bookShelf/user_profile_pictures"
           );
+          //   console.log('req.file.buffer:', req.file.buffer);
           await user.update({ userProfilePicture: profilePictureUrl });
+          //   console.log("Profile picture uploaded successfully");
         } catch (error) {
           console.error("Error uploading to Cloudinary:", error);
         }
@@ -145,7 +164,7 @@ const updateUser = async (req, res) => {
     } = req.body;
 
     // console.log(req.body);
-    let userProfilePicture = req.file ? req.file.path : null;
+    let userProfilePicture = req.file ? req.file.buffer : null;
 
     // const user = await User.findByPk(userID);
     if (!user) {
@@ -249,4 +268,39 @@ const logoutUser = async (req, res) => {
   }
 };
 
-module.exports = { signup, login, updateUser, deleteUser, logoutUser };
+const fetchUserWithUserIDorUserName = async (req, res) => {
+  try {
+    const { userID, userName } = req.query;
+    console.log("userID:", userID);
+    console.log("userName:", userName);
+    if (!userID || !userName) {
+      return res.status(400).json({ error: "userID or userName is required" });
+    }
+
+    let user;
+    if (userID) {
+      user = await User.findByPk(userID);
+    } else {
+      user = await User.findOne({ where: { userName } });
+    }
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.status(200).json({ message: "User fetched successfully", user });
+  } catch (error) {
+    console.error("Error fetching user with userID");
+    console.error(error);
+    return null;
+  }
+};
+
+module.exports = {
+  signup,
+  login,
+  updateUser,
+  deleteUser,
+  logoutUser,
+  fetchUserWithUserIDorUserName,
+};

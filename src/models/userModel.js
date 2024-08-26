@@ -12,6 +12,7 @@ const User = sequelize.define(
     userName: {
       type: DataTypes.STRING,
       allowNull: false,
+      unique: true,
     },
     userEmail: {
       type: DataTypes.STRING,
@@ -50,6 +51,16 @@ const User = sequelize.define(
   {
     tableName: "usersDB",
     timestamps: true,
+    indexes: [
+      {
+        unique: true,
+        fields: ["userID"],
+      },
+      {
+        unique: true,
+        fields: ["userName"],
+      },
+    ],
   }
 );
 

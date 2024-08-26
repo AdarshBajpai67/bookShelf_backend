@@ -7,15 +7,7 @@ const authMiddleware = require("../middlewares/authMiddleware");
 
 const router = express.Router();
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/");
-  },
-  filename: (req, file, cb) => {
-    cb(null, file.originalname);
-  },
-});
-
+const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
 router.post(
@@ -32,5 +24,6 @@ router.put(
 );
 router.delete("/delete/", authMiddleware, userController.deleteUser);
 router.post("/logout", authMiddleware, userController.logoutUser);
+router.get("/fetchuser", userController.fetchUserWithUserIDorUserName);
 
 module.exports = router;
