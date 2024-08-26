@@ -4,7 +4,7 @@ const morgan=require('morgan');
 const cookieParser=require('cookie-parser');
 
 const {connectToPostgresDB}=require('./src/database/postgresqlDB');
-const {connectToMongoDB}=require('./src/database/mongodb');
+const {connectToMongoDB}=require('./src/database/mongoDB');
 const connectToCloudinaryDB=require('./src/database/cloudinaryDB');
 
 const userRoutes=require('./src/routes/userRoutes');

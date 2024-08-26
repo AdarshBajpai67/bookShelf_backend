@@ -108,12 +108,12 @@ const login = async (req, res) => {
     res.cookie("token", token, {
       httpOnly: true, // to prevents client-side JS from accessing the cookie
       secure: process.env.NODE_ENV === "production", // to send cookie only over HTTPS in production
-      maxAge: 3600000, // 1 hour 
+      maxAge: 3600000, // 1 hour
     });
 
     res.status(200).json({
       message: "Login successful",
-    //   token,
+      //   token,
       user: {
         userID: user.userID,
         userName: user.userName,
